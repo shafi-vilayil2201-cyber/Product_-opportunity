@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CookieYes AI Compliance Monitor</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --navy:#0F2B5B;
+  --blue:#1A56DB;
+  --blue-mid:#2B65D9;
+  --blue-light:#EEF3FF;
+  --blue-border:#BFDBFE;
+  --green:#059669;
+  --green-light:#ECFDF5;
+  --green-border:#A7F3D0;
+  --amber:#D97706;
+  --amber-light:#FFFBEB;
+  --amber-border:#FDE68A;
+  --red:#DC2626;
+  --red-light:#FEF2F2;
+  --red-border:#FECACA;
+  --purple:#7C3AED;
+  --purple-light:#F5F3FF;
+  --purple-border:#DDD6FE;
+  --s50:#F8FAFC;
+  --s100:#F1F5F9;
+  --s200:#E2E8F0;
+  --s300:#CBD5E1;
+  --s400:#94A3B8;
+  --s500:#64748B;
+  --s600:#475569;
+  --s700:#334155;
+  --s900:#0F172A;
+  --white:#FFFFFF;
+  --r:12px;
+  --r-sm:8px;
+  --sh-sm:0 1px 3px rgba(15,43,91,.08),0 1px 2px rgba(15,43,91,.04);
+  --sh:0 4px 16px rgba(15,43,91,.10),0 1px 4px rgba(15,43,91,.06);
+}
+
+body{
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:var(--s50);
+  color:var(--s900);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── NAV ── */
+.topnav{
+  background:linear-gradient(135deg,var(--navy) 0%,#1a3d7c 55%,#1e4a9a 100%);
+  padding:0 24px;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 12px rgba(15,43,91,.28);
+}
+.topnav-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.brand-logo{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,#4EB8FF,#1A56DB);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.brand-text{display:flex;flex-direction:column;gap:1px;}
+.brand-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.02em;}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.5);font-weight:400;}
+
+.nav-chips{display:flex;gap:6px;}
+.chip{
+  padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;
+  color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);cursor:pointer;
+}
+.chip.active{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.28);}
+
+.site-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;padding:6px 14px;
+}
+.site-dot{width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 0 2px rgba(52,211,153,.3);flex-shrink:0;}
+.site-lbl{font-size:11px;color:rgba(255,255,255,.5);}
+.site-nm{font-size:13px;color:#fff;font-weight:600;}
+
+/* ── VIEW SWITCHER ── */
+.view-switcher{
+  background:var(--white);border-bottom:1px solid var(--s200);
+  position:sticky;top:60px;z-index:100;
+  box-shadow:0 2px 6px rgba(15,43,91,.05);
+}
+.switcher-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;
+  padding:0 24px;gap:0;
+}
+.view-tab{
+  padding:14px 24px;font-size:13px;font-weight:600;
+  color:var(--s500);border-bottom:3px solid transparent;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  white-space:nowrap;transition:color .15s;
+}
+.view-tab .tab-icon{
+  width:20px;height:20px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;
+}
+.view-tab.customer-tab .tab-icon{background:var(--blue-light);color:var(--blue);}
+.view-tab.admin-tab .tab-icon{background:var(--purple-light);color:var(--purple);}
+.view-tab.customer-tab{color:var(--blue);border-color:var(--blue);}
+.view-tab-sub{font-size:11px;font-weight:400;color:var(--s400);margin-left:4px;}
+.switcher-sep{width:1px;height:28px;background:var(--s200);margin:0 8px;}
+.switcher-note{margin-left:auto;font-size:11.5px;color:var(--s400);}
+.live-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--green);margin-right:4px;
+  box-shadow:0 0 0 2px rgba(5,150,105,.2);
+}
+
+/* ── WRAPPER ── */
+.page{max-width:1280px;margin:0 auto;padding:28px 24px 56px;}
+
+/* ── SECTION BAND ── */
+.section-band{
+  border-radius:var(--r);padding:20px 26px 14px;
+  margin-bottom:20px;border:1px solid;
+}
+.section-band.customer{
+  background:linear-gradient(135deg,#EEF3FF 0%,#F0F7FF 100%);
+  border-color:var(--blue-border);
+}
+.section-band.admin{
+  background:linear-gradient(135deg,#F5F3FF 0%,#FDF4FF 100%);
+  border-color:var(--purple-border);
+}
+.band-header{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.band-tag{
+  font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;border:1px solid;
+}
+.band-tag.customer{background:var(--blue-light);color:#1e3a8a;border-color:var(--blue-border);}
+.band-tag.admin{background:var(--purple-light);color:#4C1D95;border-color:var(--purple-border);}
+.band-title{font-size:18px;font-weight:800;color:var(--navy);letter-spacing:-.02em;}
+.band-desc{font-size:12.5px;color:var(--s500);margin-left:auto;}
+
+/* ── CARD ── */
+.card{
+  background:var(--white);border-radius:var(--r);
+  border:1px solid var(--s200);box-shadow:var(--sh-sm);
+  padding:20px 22px;
+}
+.card-hd{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--s400);margin-bottom:14px;
+}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.gap-col{display:flex;flex-direction:column;gap:16px;}
+.row-gap{display:flex;gap:16px;}
+
+/* ── HERO SCORE ── */
+.hero-row{
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:28px;align-items:center;margin-bottom:22px;
+}
+.score-ring{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.ring{
+  width:100px;height:100px;border-radius:50%;
+  background:conic-gradient(var(--blue) 0% 86%,var(--s200) 86% 100%);
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.ring::after{content:'';position:absolute;width:76px;height:76px;border-radius:50%;background:#fff;}
+.ring-num{position:relative;z-index:1;font-size:24px;font-weight:900;color:var(--navy);letter-spacing:-.04em;line-height:1;}
+.ring-lbl{font-size:11px;color:var(--s500);font-weight:500;text-align:center;text-transform:uppercase;letter-spacing:.05em;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi{
+  padding:13px 15px;border-radius:var(--r-sm);
+  background:var(--s50);border:1px solid var(--s200);
+}
+.kpi-lbl{font-size:10.5px;font-weight:600;color:var(--s400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.kpi-val{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.03em;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--s400);margin-top:3px;}
+.kpi-val.c-green{color:var(--green);}
+.kpi-val.c-amber{color:var(--amber);}
+.kpi-val.c-red{color:var(--red);}
+
+.badges-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 13px;border-radius:20px;font-size:11.5px;
+  font-weight:700;letter-spacing:.02em;border:1px solid;
+}
+.badge-dot{width:7px;height:7px;border-radius:50%;}
+.badge.medium{background:var(--amber-light);color:#92400E;border-color:var(--amber-border);}
+.badge.medium .badge-dot{background:var(--amber);}
+.badge.low{background:var(--green-light);color:#065F46;border-color:var(--green-border);}
+.badge.low .badge-dot{background:var(--green);}
+.badge.high{background:var(--red-light);color:#991B1B;border-color:var(--red-border);}
+.badge.high .badge-dot{background:var(--red);}
+.badge.info{background:var(--blue-light);color:#1e40af;border-color:var(--blue-border);}
+.badge.info .badge-dot{background:var(--blue);}
+.badge.purple{background:var(--purple-light);color:#4C1D95;border-color:var(--purple-border);}
+.badge.purple .badge-dot{background:var(--purple);}
+.scan-note{font-size:11.5px;color:var(--s500);}
+.scan-note b{color:var(--s700);}
+
+/* ── PULSE ── */
+.pulse-lbl{font-size:11px;color:var(--s400);margin-bottom:6px;}
+.pulse{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-bottom:20px;}
+.pb{height:6px;border-radius:3px;background:var(--green);}
+.pb.w{background:var(--amber);}
+.pb.d{background:var(--red);}
+.pb.n{background:var(--s200);}
+
+/* ── AI BOX ── */
+.ai-box{
+  background:linear-gradient(135deg,#EEF3FF,#F0FDF9);
+  border:1px solid #C7D7FD;border-radius:var(--r-sm);
+  padding:14px 18px;display:flex;gap:12px;align-items:flex-start;
+}
+.ai-icon{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--blue),var(--blue-mid));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;font-weight:800;letter-spacing:-.02em;
+}
+.ai-txt{font-size:13px;color:var(--s700);line-height:1.6;}
+.ai-txt strong{color:var(--navy);}
+.ai-meta{font-size:10.5px;color:var(--s400);margin-top:4px;}
+
+/* ── ALERTS ── */
+.alert-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.alert-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:11px 13px;border-radius:var(--r-sm);border:1px solid var(--s200);background:var(--s50);
+}
+.alert-item.warn{background:var(--amber-light);border-color:var(--amber-border);}
+.alert-item.danger{background:var(--red-light);border-color:var(--red-border);}
+.alert-item.info{background:var(--blue-light);border-color:var(--blue-border);}
+.a-pip{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.pip-d{background:var(--red);}
+.pip-w{background:var(--amber);}
+.pip-i{background:var(--blue);}
+.pip-g{background:var(--green);}
+.a-body{flex:1;}
+.a-title{font-size:13px;font-weight:600;color:var(--s700);line-height:1.35;}
+.a-desc{font-size:11.5px;color:var(--s500);margin-top:2px;}
+.a-time{font-size:11px;color:var(--s400);white-space:nowrap;margin-top:2px;}
+
+/* ── CONSENT GRID ── */
+.consent-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.c-item{padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--s200);background:var(--s50);}
+.c-lbl{font-size:10.5px;color:var(--s400);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;}
+.c-val{font-size:18px;font-weight:800;color:var(--navy);letter-spacing:-.02em;}
+.c-val.ok{color:var(--green);}
+.c-val.warn{color:var(--amber);}
+
+/* ── TIMELINE ── */
+.tl{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:12px;padding-bottom:14px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-l{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:14px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.tl-line{width:2px;background:var(--s200);flex:1;margin-top:4px;}
+.tl-item:last-child .tl-line{display:none;}
+.tl-bd{flex:1;}
+.tl-t{font-size:12.5px;font-weight:600;color:var(--s700);}
+.tl-d{font-size:11.5px;color:var(--s500);margin-top:1px;}
+.tl-ts{font-size:10.5px;color:var(--s400);margin-top:2px;}
+
+/* ── FIX LIST ── */
+.fix-list{display:flex;flex-direction:column;gap:8px;}
+.fix-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 12px;border-radius:var(--r-sm);border:1px solid var(--s200);background:#fff;
+}
+.fix-n{
+  width:22px;height:22px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;
+}
+.fix-n.p1{background:var(--red-light);color:var(--red);}
+.fix-n.p2{background:var(--amber-light);color:var(--amber);}
+.fix-n.p3{background:var(--blue-light);color:var(--blue);}
+.fix-bd{flex:1;}
+.fix-t{font-size:12.5px;font-weight:600;color:var(--s700);}
+.fix-s{font-size:11px;color:var(--s400);margin-top:2px;}
+.fix-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;margin-top:3px;display:inline-block;}
+.fix-tag.p1{background:var(--red-light);color:var(--red);}
+.fix-tag.p2{background:var(--amber-light);color:var(--amber);}
+.fix-tag.p3{background:var(--blue-light);color:var(--blue);}
+
+/* ── SCORE BIG ── */
+.score-display{display:flex;align-items:center;gap:18px;}
+.big-score{font-size:52px;font-weight:900;color:var(--navy);letter-spacing:-.04em;line-height:1;}
+.progress-bar{height:8px;background:var(--s100);border-radius:4px;width:160px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),#34D399);}
+
+/* ── RECS ── */
+.recs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.rec{
+  background:#fff;border:1px solid var(--s200);border-radius:var(--r);
+  box-shadow:var(--sh-sm);padding:20px;position:relative;overflow:hidden;
+}
+.rec::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.rec.p1::before{background:var(--red);}
+.rec.p2::before{background:var(--amber);}
+.rec.p3::before{background:var(--blue);}
+.rec-pri{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.rec-pri.p1{color:var(--red);}
+.rec-pri.p2{color:var(--amber);}
+.rec-pri.p3{color:var(--blue);}
+.rec-ttl{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;letter-spacing:-.01em;line-height:1.35;}
+.rec-why{font-size:12px;color:var(--s500);line-height:1.55;margin-bottom:12px;}
+.rec-meta{display:flex;flex-direction:column;gap:5px;}
+.rec-row{display:flex;gap:6px;align-items:baseline;}
+.rec-key{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--s400);min-width:54px;flex-shrink:0;}
+.rec-v{font-size:12px;color:var(--s700);font-weight:500;}
+.owner-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--blue-light);color:#1e40af;border:1px solid var(--blue-border);}
+.owner-pill.support{background:var(--purple-light);color:#5b21b6;border-color:var(--purple-border);}
+.owner-pill.compliance{background:var(--amber-light);color:#92400E;border-color:var(--amber-border);}
+.owner-pill.product{background:var(--green-light);color:#065F46;border-color:var(--green-border);}
+
+/* ── DIVIDER BETWEEN DASHBOARDS ── */
+.dashboard-divider{
+  margin:36px 0;display:flex;align-items:center;gap:16px;
+}
+.dd-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--s300),transparent);}
+.dd-label{
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--s400);white-space:nowrap;
+  padding:6px 16px;border-radius:20px;
+  background:var(--white);border:1px solid var(--s200);
+}
+
+/* ═══════ ADMIN DASHBOARD ═══════ */
+.admin-hero{
+  background:linear-gradient(135deg,#1e1553 0%,#2d1b69 60%,#3b2a8a 100%);
+  border-radius:var(--r);padding:28px 32px;margin-bottom:20px;
+  border:1px solid var(--purple-border);position:relative;overflow:hidden;
+  box-shadow:var(--sh);
+}
+.admin-hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#7C3AED,#A78BFA,#C4B5FD);
+}
+.admin-hero-grid{
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:28px;align-items:center;margin-bottom:22px;
+}
+.admin-ring{
+  width:100px;height:100px;border-radius:50%;
+  background:conic-gradient(#A78BFA 0% 91%,rgba(255,255,255,.15) 91% 100%);
+  display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+}
+.admin-ring::after{
+  content:'';position:absolute;width:76px;height:76px;
+  border-radius:50%;background:#1e1553;
+}
+.admin-ring-num{position:relative;z-index:1;font-size:24px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1;}
+.admin-ring-lbl{font-size:11px;color:rgba(255,255,255,.55);font-weight:500;text-align:center;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;}
+
+.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.admin-kpi{
+  padding:13px 15px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+}
+.admin-kpi-lbl{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.admin-kpi-val{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1;}
+.admin-kpi-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:3px;}
+.admin-kpi-val.c-green{color:#34D399;}
+.admin-kpi-val.c-amber{color:#FCD34D;}
+.admin-kpi-val.c-red{color:#F87171;}
+
+.admin-status-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.admin-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 13px;border-radius:20px;font-size:11.5px;
+  font-weight:700;letter-spacing:.02em;
+}
+.admin-badge.green{background:rgba(52,211,153,.15);color:#34D399;border:1px solid rgba(52,211,153,.3);}
+.admin-badge.amber{background:rgba(252,211,77,.15);color:#FCD34D;border:1px solid rgba(252,211,77,.3);}
+.admin-badge.red{background:rgba(248,113,113,.15);color:#F87171;border:1px solid rgba(248,113,113,.3);}
+.admin-badge-dot{width:7px;height:7px;border-radius:50%;}
+.admin-badge.green .admin-badge-dot{background:#34D399;}
+.admin-badge.amber .admin-badge-dot{background:#FCD34D;}
+.admin-note{font-size:11.5px;color:rgba(255,255,255,.5);}
+.admin-note b{color:rgba(255,255,255,.8);}
+
+.admin-ai{
+  background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);
+  border-radius:var(--r-sm);padding:14px 18px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.admin-ai-icon{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#7C3AED,#A78BFA);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;font-weight:800;
+}
+.admin-ai-txt{font-size:13px;color:rgba(255,255,255,.8);line-height:1.6;}
+.admin-ai-txt strong{color:#fff;}
+.admin-ai-meta{font-size:10.5px;color:rgba(255,255,255,.35);margin-top:4px;}
+
+/* Admin cards */
+.admin-card{
+  background:#fff;border-radius:var(--r);
+  border:1px solid var(--s200);box-shadow:var(--sh-sm);
+  padding:20px 22px;
+  border-top:3px solid var(--purple);
+}
+.admin-card .card-hd{color:var(--s400);}
+
+/* Support stat row */
+.sup-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.sup-stat{
+  padding:12px 14px;border-radius:var(--r-sm);
+  background:var(--purple-light);border:1px solid var(--purple-border);
+}
+.sup-stat-lbl{font-size:10.5px;color:#6D28D9;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.sup-stat-val{font-size:20px;font-weight:900;color:#4C1D95;letter-spacing:-.03em;line-height:1;}
+.sup-stat-val.ok{color:var(--green);}
+.sup-stat-val.warn{color:var(--amber);}
+.sup-stat-val.danger{color:var(--red);}
+
+/* Category bars */
+.cat-list{display:flex;flex-direction:column;gap:9px;}
+.cat-item{display:flex;flex-direction:column;gap:4px;}
+.cat-hdr{display:flex;justify-content:space-between;}
+.cat-nm{font-size:12px;font-weight:500;color:var(--s700);}
+.cat-pct{font-size:11px;color:var(--s500);font-weight:600;}
+.cat-bar{height:5px;background:var(--s100);border-radius:3px;overflow:hidden;}
+.cat-fill{height:100%;border-radius:3px;}
+.f-blue{background:var(--blue);}
+.f-amber{background:var(--amber);}
+.f-red{background:var(--red);}
+.f-purple{background:var(--purple);}
+.f-green{background:var(--green);}
+
+/* Sites table */
+.sites-tbl{width:100%;border-collapse:collapse;}
+.sites-tbl th{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--s400);text-align:left;padding:0 0 8px;border-bottom:1px solid var(--s200);
+}
+.sites-tbl td{
+  padding:9px 0;border-bottom:1px solid var(--s100);
+  font-size:12px;color:var(--s700);vertical-align:middle;
+}
+.sites-tbl tr:last-child td{border-bottom:none;}
+.score-pill{
+  display:inline-block;padding:2px 9px;border-radius:10px;
+  font-size:11px;font-weight:700;
+}
+.score-pill.ok{background:var(--green-light);color:#065F46;}
+.score-pill.warn{background:var(--amber-light);color:#92400E;}
+.score-pill.danger{background:var(--red-light);color:#991B1B;}
+
+/* Confidence */
+.conf-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.conf-ring{
+  width:56px;height:56px;border-radius:50%;
+  background:conic-gradient(var(--green) 0% 91%,var(--s200) 91% 100%);
+  display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+}
+.conf-ring::after{content:'';position:absolute;width:42px;height:42px;border-radius:50%;background:#fff;}
+.conf-num{position:relative;z-index:1;font-size:14px;font-weight:800;color:var(--navy);}
+.conf-detail{flex:1;}
+.conf-lbl{font-size:13px;font-weight:600;color:var(--s700);}
+.conf-sub{font-size:11.5px;color:var(--s500);margin-top:2px;}
+.fp-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+  background:var(--green-light);color:#065F46;border:1px solid var(--green-border);
+}
+
+/* Coverage grid */
+.cov-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.cov-site{
+  aspect-ratio:1;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;border:1px solid;
+}
+.cov-ok{background:var(--green-light);color:#065F46;border-color:var(--green-border);}
+.cov-warn{background:var(--amber-light);color:#92400E;border-color:var(--amber-border);}
+.cov-off{background:var(--s100);color:var(--s400);border-color:var(--s200);}
+.cov-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+.cov-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--s500);}
+.cov-leg-dot{width:8px;height:8px;border-radius:2px;}
+
+/* Notes */
+.note-list{display:flex;flex-direction:column;gap:9px;}
+.note{
+  padding:11px 13px;border-radius:var(--r-sm);
+  border:1px solid var(--purple-border);background:var(--purple-light);
+  font-size:12px;color:var(--s700);line-height:1.5;
+  border-left:3px solid var(--purple);
+}
+.note-own{font-size:10.5px;color:var(--purple);font-weight:700;margin-top:4px;}
+
+/* Rule engine */
+.rule-list{display:flex;flex-direction:column;gap:8px;}
+.rule-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--s200);background:var(--s50);
+}
+.rule-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.rule-bd{flex:1;}
+.rule-name{font-size:12px;font-weight:600;color:var(--s700);}
+.rule-detail{font-size:11px;color:var(--s400);margin-top:1px;}
+.rule-status{font-size:11px;font-weight:700;white-space:nowrap;}
+.rule-status.active{color:var(--green);}
+.rule-status.review{color:var(--amber);}
+
+/* Escalation list */
+.esc-list{display:flex;flex-direction:column;gap:8px;}
+.esc-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--red-border);background:var(--red-light);
+}
+.esc-bd{flex:1;}
+.esc-t{font-size:12.5px;font-weight:600;color:#991B1B;}
+.esc-d{font-size:11px;color:#B91C1C;margin-top:2px;}
+.esc-meta{font-size:10.5px;color:var(--s500);margin-top:3px;}
+
+/* Product metrics */
+.metric-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.metric-item{
+  padding:13px 14px;border-radius:var(--r-sm);
+  border:1px solid var(--s200);background:var(--s50);
+  text-align:center;
+}
+.metric-val{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.03em;}
+.metric-lbl{font-size:10.5px;color:var(--s400);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.metric-chg{font-size:11px;margin-top:2px;font-weight:600;}
+.metric-chg.up{color:var(--green);}
+.metric-chg.dn{color:var(--red);}
+
+/* Audit log */
+.audit-list{display:flex;flex-direction:column;gap:0;}
+.audit-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--s100);font-size:12px;
+}
+.audit-item:last-child{border-bottom:none;}
+.audit-time{font-size:10.5px;color:var(--s400);min-width:70px;font-weight:500;}
+.audit-action{flex:1;color:var(--s700);}
+.audit-actor{font-size:11px;color:var(--s400);white-space:nowrap;}
+.audit-sev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.audit-sev.high{background:var(--red-light);color:var(--red);}
+.audit-sev.med{background:var(--amber-light);color:var(--amber);}
+.audit-sev.low{background:var(--green-light);color:var(--green);}
+
+/* ── FOOTER ── */
+.footer-strip{
+  background:#fff;border:1px solid var(--s200);border-radius:var(--r);
+  box-shadow:var(--sh-sm);padding:16px 22px;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+}
+.footer-item{display:flex;flex-direction:column;gap:2px;}
+.f-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--s400);}
+.f-val{font-size:12.5px;font-weight:600;color:var(--s700);}
+.fdiv{width:1px;height:30px;background:var(--s200);}
+.footer-btns{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;
+  cursor:pointer;text-decoration:none;border:1px solid;
+}
+.btn-out{background:#fff;border-color:var(--s300);color:var(--s700);}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff;}
+.btn-purple{background:var(--purple);border-color:var(--purple);color:#fff;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .g3,.recs-grid{grid-template-columns:1fr 1fr;}
+  .admin-kpis,.kpi-grid{grid-template-columns:1fr 1fr;}
+  .metric-g{grid-template-columns:1fr 1fr 1fr;}
+}
+@media(max-width:768px){
+  .topnav-inner{height:auto;padding:12px 0;flex-wrap:wrap;}
+  .nav-chips{display:none;}
+  .hero-row,.admin-hero-grid{grid-template-columns:1fr;gap:16px;}
+  .badges-col,.admin-status-col{flex-direction:row;flex-wrap:wrap;align-items:center;}
+  .g2,.g3,.recs-grid,.sup-stats,.kpi-grid,.admin-kpis{grid-template-columns:1fr;}
+  .metric-g{grid-template-columns:1fr 1fr;}
+  .cov-grid{grid-template-columns:repeat(6,1fr);}
+  .footer-strip{flex-direction:column;align-items:flex-start;}
+  .footer-btns{margin-left:0;}
+  .fdiv{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     TOP NAV
+════════════════════════════════════ -->
+<header class="topnav">
+  <div class="topnav-inner">
+    <a class="brand" href="#">
+      <div class="brand-logo">CY</div>
+      <div class="brand-text">
+        <div class="brand-name">CookieYes AI Compliance Monitor</div>
+        <div class="brand-sub">Monitor changes, understand risk, and act faster</div>
+      </div>
+    </a>
+    <div class="nav-chips">
+      <div class="chip">7d</div>
+      <div class="chip active">30d</div>
+      <div class="chip">90d</div>
+      <div class="chip">Custom</div>
+    </div>
+    <div class="site-pill">
+      <div class="site-dot"></div>
+      <div>
+        <div class="site-lbl">Active site</div>
+        <div class="site-nm">acmecorp.com</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- VIEW SWITCHER -->
+<div class="view-switcher">
+  <div class="switcher-inner">
+    <div class="view-tab customer-tab">
+      <div class="tab-icon">C</div>
+      Customer Dashboard
+      <span class="view-tab-sub">— acmecorp.com</span>
+    </div>
+    <div class="switcher-sep"></div>
+    <div class="view-tab admin-tab" style="color:var(--purple);">
+      <div class="tab-icon" style="background:var(--purple-light);color:var(--purple);">A</div>
+      CookieYes Admin
+      <span class="view-tab-sub">— Internal Operations</span>
+    </div>
+    <div class="switcher-note">
+      <span class="live-dot"></span>Live monitoring · Last scan 2h ago · 12 sites active
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     PAGE CONTENT
+════════════════════════════════════ -->
+<main class="page">
+
+
+<!-- ════════════════════════════════════
+  ①  CUSTOMER DASHBOARD
+════════════════════════════════════ -->
+<div class="section-band customer">
+  <div class="band-header">
+    <div class="band-tag customer">Customer View</div>
+    <div class="band-title">Your Website Compliance Dashboard</div>
+    <div class="band-desc">acmecorp.com · Last updated 2 hours ago</div>
+  </div>
+</div>
+
+<!-- Customer Hero -->
+<div class="card" style="margin-bottom:20px;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),#34D399,var(--amber),var(--red));"></div>
+  <div class="hero-row">
+    <!-- Ring -->
+    <div class="score-ring">
+      <div class="ring"><div class="ring-num">86</div></div>
+      <div class="ring-lbl">Compliance<br>Score</div>
+    </div>
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-lbl">Risk Level</div>
+        <div class="kpi-val c-amber">Medium</div>
+        <div class="kpi-sub">Elevated from last scan</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">New Issues</div>
+        <div class="kpi-val c-red">4</div>
+        <div class="kpi-sub">Since last scan</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">High Priority</div>
+        <div class="kpi-val c-amber">2</div>
+        <div class="kpi-sub">Actions needed</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Consent Rate</div>
+        <div class="kpi-val">78%</div>
+        <div class="kpi-sub">7-day average</div>
+      </div>
+    </div>
+    <!-- Badges -->
+    <div class="badges-col">
+      <div class="badge medium"><span class="badge-dot"></span>Medium Risk</div>
+      <div class="scan-note">Last scan: <b>2 hours ago</b></div>
+      <div class="scan-note">Rules applied: <b>142</b></div>
+      <div class="scan-note">Alerts resolved: <b>9 this week</b></div>
+    </div>
+  </div>
+
+  <!-- Pulse -->
+  <div class="pulse-lbl">Compliance health signal — last 12 scan intervals</div>
+  <div class="pulse">
+    <div class="pb"></div><div class="pb"></div><div class="pb"></div>
+    <div class="pb"></div><div class="pb"></div><div class="pb"></div>
+    <div class="pb"></div><div class="pb w"></div><div class="pb w"></div>
+    <div class="pb"></div><div class="pb d"></div><div class="pb w"></div>
+  </div>
+
+  <!-- AI insight -->
+  <div class="ai-box">
+    <div class="ai-icon">AI</div>
+    <div>
+      <div class="ai-txt">
+        <strong>Your compliance setup is mostly healthy,</strong> but a new analytics script and an
+        outdated regional banner may need review. Two issues are high priority. Fixing them should
+        reduce compliance risk and improve trust with users in affected regions.
+      </div>
+      <div class="ai-meta">Generated by CookieYes AI · 2 hours ago · Confidence: 91%</div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer body: two columns -->
+<div class="g2" style="margin-bottom:20px;">
+
+  <!-- LEFT -->
+  <div class="gap-col">
+
+    <!-- Score card -->
+    <div class="card">
+      <div class="card-hd">Website Compliance Score</div>
+      <div class="score-display">
+        <div class="big-score">86</div>
+        <div>
+          <p style="font-size:13px;color:var(--s500);margin-bottom:6px;">out of 100 · Medium risk</p>
+          <div class="badge medium" style="font-size:11px;padding:4px 10px;">
+            <span class="badge-dot"></span>Needs attention
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:86%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent change alerts -->
+    <div class="card">
+      <div class="card-hd">Recent Change Alerts</div>
+      <ul class="alert-list">
+        <li class="alert-item danger">
+          <div class="a-pip pip-d"></div>
+          <div class="a-body">
+            <div class="a-title">New analytics script added without categorization</div>
+            <div class="a-desc">gtag.js variant detected on /checkout — not yet assigned a consent category.</div>
+          </div>
+          <div class="a-time">2h ago</div>
+        </li>
+        <li class="alert-item warn">
+          <div class="a-pip pip-w"></div>
+          <div class="a-body">
+            <div class="a-title">Consent banner text outdated — EU region</div>
+            <div class="a-desc">Banner copy references a deprecated policy URL for German-language visitors.</div>
+          </div>
+          <div class="a-time">5h ago</div>
+        </li>
+        <li class="alert-item warn">
+          <div class="a-pip pip-w"></div>
+          <div class="a-body">
+            <div class="a-title">New third-party tracker detected</div>
+            <div class="a-desc">segment.io not listed in your current cookie declaration.</div>
+          </div>
+          <div class="a-time">Yesterday</div>
+        </li>
+        <li class="alert-item info">
+          <div class="a-pip pip-i"></div>
+          <div class="a-body">
+            <div class="a-title">CookieYes config changed after plugin update</div>
+            <div class="a-desc">A WordPress plugin update modified consent blocking rules.</div>
+          </div>
+          <div class="a-time">2d ago</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Consent status -->
+    <div class="card">
+      <div class="card-hd">Consent Setup Status</div>
+      <div class="consent-g">
+        <div class="c-item"><div class="c-lbl">Consent Rate</div><div class="c-val ok">78%</div></div>
+        <div class="c-item"><div class="c-lbl">Banner Active</div><div class="c-val ok">Yes</div></div>
+        <div class="c-item"><div class="c-lbl">Regions Covered</div><div class="c-val warn">4 / 6</div></div>
+        <div class="c-item"><div class="c-lbl">Scripts Blocked</div><div class="c-val">12</div></div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT -->
+  <div class="gap-col">
+
+    <!-- What changed timeline -->
+    <div class="card">
+      <div class="card-hd">What Changed — Timeline</div>
+      <div class="tl">
+        <div class="tl-item">
+          <div class="tl-l"><div class="tl-dot" style="background:var(--red);"></div><div class="tl-line"></div></div>
+          <div class="tl-bd">
+            <div class="tl-t">Uncategorized script detected on /checkout</div>
+            <div class="tl-d">Analytics script added without consent mapping</div>
+            <div class="tl-ts">Today, 09:14</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-l"><div class="tl-dot" style="background:var(--amber);"></div><div class="tl-line"></div></div>
+          <div class="tl-bd">
+            <div class="tl-t">EU banner policy link outdated</div>
+            <div class="tl-d">Consent text for German locale references old URL</div>
+            <div class="tl-ts">Today, 06:02</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-l"><div class="tl-dot" style="background:var(--amber);"></div><div class="tl-line"></div></div>
+          <div class="tl-bd">
+            <div class="tl-t">New tracker: segment.io</div>
+            <div class="tl-d">Found during cookie scan, not in declaration</div>
+            <div class="tl-ts">Yesterday, 18:45</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-l"><div class="tl-dot" style="background:var(--blue);"></div><div class="tl-line"></div></div>
+          <div class="tl-bd">
+            <div class="tl-t">Legacy embed flagged on /resources</div>
+            <div class="tl-d">Old embed script should be reviewed or removed</div>
+            <div class="tl-ts">2 days ago</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-l"><div class="tl-dot" style="background:var(--green);"></div></div>
+          <div class="tl-bd">
+            <div class="tl-t">9 alerts resolved this week</div>
+            <div class="tl-d">Configuration and banner issues closed</div>
+            <div class="tl-ts">This week</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What to fix first -->
+    <div class="card">
+      <div class="card-hd">What to Fix First</div>
+      <div class="fix-list">
+        <div class="fix-item">
+          <div class="fix-n p1">1</div>
+          <div class="fix-bd">
+            <div class="fix-t">Categorize the new analytics script</div>
+            <div class="fix-s">Add gtag.js to your Analytics category in CookieYes</div>
+          </div>
+          <div class="fix-tag p1">High</div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-n p2">2</div>
+          <div class="fix-bd">
+            <div class="fix-t">Update EU banner policy text</div>
+            <div class="fix-s">Fix the outdated link in your German-locale consent banner</div>
+          </div>
+          <div class="fix-tag p2">High</div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-n p3">3</div>
+          <div class="fix-bd">
+            <div class="fix-t">Add segment.io to your cookie declaration</div>
+            <div class="fix-s">Declare the tracker and assign appropriate consent category</div>
+          </div>
+          <div class="fix-tag p3">Medium</div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-n p3">4</div>
+          <div class="fix-bd">
+            <div class="fix-t">Review legacy embed on /resources</div>
+            <div class="fix-s">Determine if the embed is still needed; remove or reclassify</div>
+          </div>
+          <div class="fix-tag p3">Low</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div><!-- /g2 customer -->
+
+<!-- Customer Recommendations -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:17px;font-weight:800;color:var(--navy);letter-spacing:-.01em;margin-bottom:4px;">Prioritized Recommendations</div>
+  <div style="font-size:12px;color:var(--s400);">AI-generated · 3 actions to improve your compliance score</div>
+</div>
+<div class="recs-grid" style="margin-bottom:28px;">
+  <div class="rec p1">
+    <div class="rec-pri p1">Priority 1 · Critical</div>
+    <div class="rec-ttl">Categorize the uncategorized analytics script on /checkout</div>
+    <div class="rec-why">A script on your checkout page without a consent category may load before users consent — creating direct GDPR and ePrivacy exposure for EU visitors.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Closes a live compliance gap. Reduces risk score by ~8 pts.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill">Customer</span></div></div>
+    </div>
+  </div>
+  <div class="rec p2">
+    <div class="rec-pri p2">Priority 2 · Warning</div>
+    <div class="rec-ttl">Update EU consent banner for the German locale</div>
+    <div class="rec-why">Your banner references a deprecated privacy policy URL for German-language users — inaccurate consent information that may be challenged under GDPR Art. 13.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Restores regional compliance. Quick fix — under 15 min.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill">Customer</span></div></div>
+    </div>
+  </div>
+  <div class="rec p3">
+    <div class="rec-pri p3">Priority 3 · Advisory</div>
+    <div class="rec-ttl">Add segment.io to your cookie declaration and consent flow</div>
+    <div class="rec-why">A new third-party tracker was found but is not declared on your public cookie list. Transparency regulations in multiple jurisdictions require all active trackers to be disclosed.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Improves declaration completeness and user trust.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill compliance">Compliance</span></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     DIVIDER BETWEEN THE TWO DASHBOARDS
+════════════════════════════════════ -->
+<div class="dashboard-divider">
+  <div class="dd-line"></div>
+  <div class="dd-label">CookieYes Admin Dashboard</div>
+  <div class="dd-line"></div>
+</div>
+
+
+<!-- ════════════════════════════════════
+  ②  COOKIEYES ADMIN DASHBOARD
+════════════════════════════════════ -->
+<div class="section-band admin" style="margin-bottom:20px;">
+  <div class="band-header">
+    <div class="band-tag admin">Admin View</div>
+    <div class="band-title">CookieYes Operations &amp; Intelligence Center</div>
+    <div class="band-desc">Internal use only · 12 sites monitored</div>
+  </div>
+</div>
+
+<!-- Admin Hero -->
+<div class="admin-hero" style="margin-bottom:20px;">
+  <div class="admin-hero-grid">
+    <!-- Ring -->
+    <div class="score-ring">
+      <div class="admin-ring"><div class="admin-ring-num">91%</div></div>
+      <div class="admin-ring-lbl" style="color:rgba(255,255,255,.55);">AI Alert<br>Confidence</div>
+    </div>
+    <!-- KPIs -->
+    <div class="admin-kpis">
+      <div class="admin-kpi">
+        <div class="admin-kpi-lbl">Sites Monitored</div>
+        <div class="admin-kpi-val">12</div>
+        <div class="admin-kpi-sub">9 healthy · 3 warnings</div>
+      </div>
+      <div class="admin-kpi">
+        <div class="admin-kpi-lbl">Open Tickets</div>
+        <div class="admin-kpi-val c-amber">7</div>
+        <div class="admin-kpi-sub">2 escalated</div>
+      </div>
+      <div class="admin-kpi">
+        <div class="admin-kpi-lbl">Resolved This Week</div>
+        <div class="admin-kpi-val c-green">9</div>
+        <div class="admin-kpi-sub">Avg. 18h resolution</div>
+      </div>
+      <div class="admin-kpi">
+        <div class="admin-kpi-lbl">False Positive Rate</div>
+        <div class="admin-kpi-val c-green">Low</div>
+        <div class="admin-kpi-sub">3 in last 30 days</div>
+      </div>
+    </div>
+    <!-- Status col -->
+    <div class="admin-status-col">
+      <div class="admin-badge green"><span class="admin-badge-dot"></span>AI Engine Active</div>
+      <div class="admin-badge amber"><span class="admin-badge-dot"></span>2 Escalations</div>
+      <div class="admin-note">Rules version: <b>3.1.3</b></div>
+      <div class="admin-note">Last deploy: <b>3 days ago</b></div>
+    </div>
+  </div>
+
+  <!-- Admin AI Insight -->
+  <div class="admin-ai">
+    <div class="admin-ai-icon">AI</div>
+    <div>
+      <div class="admin-ai-txt">
+        <strong>System health is strong.</strong> Alert confidence is at 91% with only 3 false positives
+        across 12 monitored sites this month. betastore.io remains the highest-risk account with 7 open
+        issues — escalation recommended. A rule set update for CPRA (California) is pending deployment.
+      </div>
+      <div class="admin-ai-meta">CookieYes AI Operations Summary · Generated 2 hours ago · Internal use only</div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin body: 2-col -->
+<div class="g2" style="margin-bottom:20px;">
+
+  <!-- LEFT -->
+  <div class="gap-col">
+
+    <!-- Support trend -->
+    <div class="admin-card">
+      <div class="card-hd">Support Ticket Trend</div>
+      <div class="sup-stats">
+        <div class="sup-stat">
+          <div class="sup-stat-lbl">Open</div>
+          <div class="sup-stat-val warn">7</div>
+        </div>
+        <div class="sup-stat">
+          <div class="sup-stat-lbl">Resolved</div>
+          <div class="sup-stat-val ok">9</div>
+        </div>
+        <div class="sup-stat">
+          <div class="sup-stat-lbl">Avg Resolve</div>
+          <div class="sup-stat-val">18h</div>
+        </div>
+        <div class="sup-stat">
+          <div class="sup-stat-lbl">Escalated</div>
+          <div class="sup-stat-val danger">2</div>
+        </div>
+      </div>
+
+      <div class="card-hd" style="margin-top:4px;">Common Issue Categories</div>
+      <div class="cat-list">
+        <div class="cat-item">
+          <div class="cat-hdr"><div class="cat-nm">Script categorization missing</div><div class="cat-pct">38%</div></div>
+          <div class="cat-bar"><div class="cat-fill f-blue" style="width:38%;"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-hdr"><div class="cat-nm">Banner text / locale mismatch</div><div class="cat-pct">27%</div></div>
+          <div class="cat-bar"><div class="cat-fill f-amber" style="width:27%;"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-hdr"><div class="cat-nm">New tracker not in declaration</div><div class="cat-pct">19%</div></div>
+          <div class="cat-bar"><div class="cat-fill f-red" style="width:19%;"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-hdr"><div class="cat-nm">Plugin-triggered config change</div><div class="cat-pct">10%</div></div>
+          <div class="cat-bar"><div class="cat-fill f-purple" style="width:10%;"></div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-hdr"><div class="cat-nm">Consent rate drop (&lt;60%)</div><div class="cat-pct">6%</div></div>
+          <div class="cat-bar"><div class="cat-fill f-green" style="width:6%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert quality + confidence -->
+    <div class="admin-card">
+      <div class="card-hd">AI Alert Quality</div>
+      <div class="conf-row">
+        <div class="conf-ring"><div class="conf-num">91%</div></div>
+        <div class="conf-detail">
+          <div class="conf-lbl">Alert Confidence Score</div>
+          <div class="conf-sub">91% of AI alerts confirmed accurate by support team over last 30 days across all monitored sites.</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="fp-chip"><span>✓</span> False Positive Rate: Low</div>
+        <div style="font-size:11.5px;color:var(--s500);">3 false positives in 30 days (12 sites)</div>
+      </div>
+    </div>
+
+    <!-- Escalations -->
+    <div class="admin-card">
+      <div class="card-hd">Active Escalations</div>
+      <div class="esc-list">
+        <div class="esc-item">
+          <div class="a-pip pip-d" style="margin-top:4px;flex-shrink:0;"></div>
+          <div class="esc-bd">
+            <div class="esc-t">betastore.io — 7 open issues, no customer response</div>
+            <div class="esc-d">Customer has not acknowledged alerts in 3 days. Account manager escalation required.</div>
+            <div class="esc-meta">Assigned: Sarah M. · Opened: 3 days ago · Priority: High</div>
+          </div>
+        </div>
+        <div class="esc-item">
+          <div class="a-pip pip-d" style="margin-top:4px;flex-shrink:0;"></div>
+          <div class="esc-bd">
+            <div class="esc-t">clarityhealth.co — HIPAA pixel false positive logged</div>
+            <div class="esc-d">AI flagged a HIPAA-compliant pixel as a tracker. Requires AI training label update and exclusion filter.</div>
+            <div class="esc-meta">Assigned: Product/AI Team · Opened: 1 day ago · Priority: Medium</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit log -->
+    <div class="admin-card">
+      <div class="card-hd">Recent Audit Log</div>
+      <div class="audit-list">
+        <div class="audit-item">
+          <div class="audit-time">09:14 today</div>
+          <div class="audit-action">AI flagged uncategorized script on acmecorp.com/checkout</div>
+          <div class="audit-sev high">High</div>
+          <div class="audit-actor">AI Engine</div>
+        </div>
+        <div class="audit-item">
+          <div class="audit-time">06:02 today</div>
+          <div class="audit-action">Banner locale mismatch detected — acmecorp.com / DE</div>
+          <div class="audit-sev med">Med</div>
+          <div class="audit-actor">AI Engine</div>
+        </div>
+        <div class="audit-item">
+          <div class="audit-time">Yesterday</div>
+          <div class="audit-action">False positive logged for clarityhealth.co HIPAA pixel</div>
+          <div class="audit-sev med">Med</div>
+          <div class="audit-actor">Support: Tom K.</div>
+        </div>
+        <div class="audit-item">
+          <div class="audit-time">2 days ago</div>
+          <div class="audit-action">Rule set 3.1.3 deployed to all monitored sites</div>
+          <div class="audit-sev low">Info</div>
+          <div class="audit-actor">Ops: Dev Team</div>
+        </div>
+        <div class="audit-item">
+          <div class="audit-time">3 days ago</div>
+          <div class="audit-action">betastore.io escalation opened — 7 unresolved issues</div>
+          <div class="audit-sev high">High</div>
+          <div class="audit-actor">Support: Sarah M.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin left -->
+
+  <!-- RIGHT -->
+  <div class="gap-col">
+
+    <!-- Sites with repeated warnings -->
+    <div class="admin-card">
+      <div class="card-hd">All Monitored Sites — Status Overview</div>
+      <table class="sites-tbl">
+        <thead>
+          <tr>
+            <th>Site</th>
+            <th>Score</th>
+            <th>Open Issues</th>
+            <th>Risk</th>
+            <th>Last Scan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">betastore.io</td>
+            <td><span class="score-pill danger">61</span></td>
+            <td>7 open</td>
+            <td><span class="badge high" style="font-size:10px;padding:2px 8px;">High</span></td>
+            <td style="color:var(--s400);">2h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">clarityhealth.co</td>
+            <td><span class="score-pill warn">74</span></td>
+            <td>3 open</td>
+            <td><span class="badge medium" style="font-size:10px;padding:2px 8px;">Medium</span></td>
+            <td style="color:var(--s400);">4h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">acmecorp.com</td>
+            <td><span class="score-pill warn">86</span></td>
+            <td>4 open</td>
+            <td><span class="badge medium" style="font-size:10px;padding:2px 8px;">Medium</span></td>
+            <td style="color:var(--s400);">2h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">shopnova.com</td>
+            <td><span class="score-pill ok">93</span></td>
+            <td>0 open</td>
+            <td><span class="badge low" style="font-size:10px;padding:2px 8px;">Healthy</span></td>
+            <td style="color:var(--s400);">1h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">brandlabs.co</td>
+            <td><span class="score-pill ok">97</span></td>
+            <td>0 open</td>
+            <td><span class="badge low" style="font-size:10px;padding:2px 8px;">Healthy</span></td>
+            <td style="color:var(--s400);">3h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">stackmeta.io</td>
+            <td><span class="score-pill ok">91</span></td>
+            <td>1 open</td>
+            <td><span class="badge low" style="font-size:10px;padding:2px 8px;">Healthy</span></td>
+            <td style="color:var(--s400);">2h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">nudgeapp.com</td>
+            <td><span class="score-pill ok">89</span></td>
+            <td>0 open</td>
+            <td><span class="badge low" style="font-size:10px;padding:2px 8px;">Healthy</span></td>
+            <td style="color:var(--s400);">5h ago</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">primetools.dev</td>
+            <td><span class="score-pill ok">95</span></td>
+            <td>0 open</td>
+            <td><span class="badge low" style="font-size:10px;padding:2px 8px;">Healthy</span></td>
+            <td style="color:var(--s400);">6h ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Monitoring coverage -->
+    <div class="admin-card">
+      <div class="card-hd">Monitoring Coverage — 12 Sites</div>
+      <div class="cov-grid">
+        <div class="cov-site cov-ok" title="shopnova.com">✓</div>
+        <div class="cov-site cov-ok" title="brandlabs.co">✓</div>
+        <div class="cov-site cov-ok" title="cleankit.io">✓</div>
+        <div class="cov-site cov-warn" title="acmecorp.com">!</div>
+        <div class="cov-site cov-warn" title="betastore.io">!</div>
+        <div class="cov-site cov-ok" title="nudgeapp.com">✓</div>
+        <div class="cov-site cov-ok" title="primetools.dev">✓</div>
+        <div class="cov-site cov-warn" title="clarityhealth.co">!</div>
+        <div class="cov-site cov-ok" title="stackmeta.io">✓</div>
+        <div class="cov-site cov-ok" title="solvelab.co">✓</div>
+        <div class="cov-site cov-ok" title="fieldops.io">✓</div>
+        <div class="cov-site cov-ok" title="vaultware.com">✓</div>
+      </div>
+      <div class="cov-legend">
+        <div class="cov-leg-item"><div class="cov-leg-dot" style="background:var(--green);"></div>Healthy (9)</div>
+        <div class="cov-leg-item"><div class="cov-leg-dot" style="background:var(--amber);"></div>Warning (3)</div>
+        <div class="cov-leg-item"><div class="cov-leg-dot" style="background:var(--s300);"></div>Offline (0)</div>
+      </div>
+    </div>
+
+    <!-- Rule engine status -->
+    <div class="admin-card">
+      <div class="card-hd">Rule Engine Status</div>
+      <div class="rule-list">
+        <div class="rule-item">
+          <div class="rule-icon" style="background:var(--green-light);">✓</div>
+          <div class="rule-bd">
+            <div class="rule-name">GDPR / ePrivacy Directive</div>
+            <div class="rule-detail">48 rules active · EU region · v3.1.3</div>
+          </div>
+          <div class="rule-status active">Active</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon" style="background:var(--green-light);">✓</div>
+          <div class="rule-bd">
+            <div class="rule-name">CCPA / CPRA (California)</div>
+            <div class="rule-detail">31 rules active · US-CA · v3.1.3</div>
+          </div>
+          <div class="rule-status active">Active</div>
+        </div>
+        <div class="rule-item" style="background:var(--amber-light);border-color:var(--amber-border);">
+          <div class="rule-icon" style="background:var(--amber-light);">!</div>
+          <div class="rule-bd">
+            <div class="rule-name">CPRA Rule Set 3.1.4 — Pending</div>
+            <div class="rule-detail">Updated rules awaiting deployment · 12 sites affected</div>
+          </div>
+          <div class="rule-status review">Pending</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon" style="background:var(--blue-light);">i</div>
+          <div class="rule-bd">
+            <div class="rule-name">LGPD (Brazil)</div>
+            <div class="rule-detail">22 rules active · BR region · v3.1.3</div>
+          </div>
+          <div class="rule-status active">Active</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon" style="background:var(--blue-light);">i</div>
+          <div class="rule-bd">
+            <div class="rule-name">PIPA (South Korea)</div>
+            <div class="rule-detail">19 rules active · KR region · v3.1.3</div>
+          </div>
+          <div class="rule-status active">Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product / AI metrics -->
+    <div class="admin-card">
+      <div class="card-hd">Platform &amp; AI Health Metrics</div>
+      <div class="metric-g">
+        <div class="metric-item">
+          <div class="metric-val">99.8%</div>
+          <div class="metric-lbl">Uptime</div>
+          <div class="metric-chg up">↑ Stable</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val">142</div>
+          <div class="metric-lbl">Rules Active</div>
+          <div class="metric-chg up">↑ +4 this week</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val">2.1s</div>
+          <div class="metric-lbl">Avg Scan Time</div>
+          <div class="metric-chg up">↓ Improved</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val">91%</div>
+          <div class="metric-lbl">AI Confidence</div>
+          <div class="metric-chg up">↑ +2% vs last month</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val">3</div>
+          <div class="metric-lbl">False Positives</div>
+          <div class="metric-chg up">↓ Down from 7</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val">78%</div>
+          <div class="metric-lbl">Avg Consent Rate</div>
+          <div class="metric-chg dn">↓ -2% vs last month</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Internal notes -->
+    <div class="admin-card">
+      <div class="card-hd">Internal Notes &amp; Recommended Actions</div>
+      <div class="note-list">
+        <div class="note">
+          betastore.io has 7 open issues including an uncategorized pixel. Customer has not responded in 3 days — escalate to account manager and flag for renewal risk review.
+          <div class="note-own">→ Owner: Support Team · Due: Today</div>
+        </div>
+        <div class="note">
+          False positive logged for clarityhealth.co (HIPAA-compliant pixel). Update AI training labels and add domain to exclusion filter before next scan cycle.
+          <div class="note-own">→ Owner: Product / AI Team · Due: This sprint</div>
+        </div>
+        <div class="note">
+          CPRA rule set 3.1.4 ready for deployment. Push to all 12 monitored sites by end of sprint. Notify account managers before rollout to prevent unexpected customer alerts.
+          <div class="note-own">→ Owner: Compliance Engineering · Due: End of sprint</div>
+        </div>
+        <div class="note">
+          Consent rate across monitored sites dropped 2% month-over-month. Investigate whether a banner design change is contributing to lower acceptance rates.
+          <div class="note-own">→ Owner: Product Team · Due: Next review cycle</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin right -->
+</div><!-- /g2 admin -->
+
+<!-- Admin Recommendations -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:17px;font-weight:800;color:var(--navy);letter-spacing:-.01em;margin-bottom:4px;">Operational Priorities</div>
+  <div style="font-size:12px;color:var(--s400);">AI-generated internal recommendations · CookieYes team actions</div>
+</div>
+<div class="recs-grid" style="margin-bottom:28px;">
+  <div class="rec p1">
+    <div class="rec-pri p1">Priority 1 · Escalate</div>
+    <div class="rec-ttl">Contact betastore.io account manager immediately</div>
+    <div class="rec-why">7 unresolved compliance issues and 3 days of customer silence creates churn risk. This account needs a proactive outreach before the next invoice cycle.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Prevents churn. Demonstrates proactive service quality.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill support">Support</span></div></div>
+    </div>
+  </div>
+  <div class="rec p2">
+    <div class="rec-pri p2">Priority 2 · Deploy</div>
+    <div class="rec-ttl">Deploy CPRA rule set 3.1.4 to all monitored sites</div>
+    <div class="rec-why">Updated California privacy rules are ready but undeployed. Delay increases regulatory exposure for US-based customers and could generate unnecessary support tickets.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Closes compliance gap for all US-CA customers.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill compliance">Compliance Eng</span></div></div>
+    </div>
+  </div>
+  <div class="rec p3">
+    <div class="rec-pri p3">Priority 3 · Improve</div>
+    <div class="rec-ttl">Retrain AI model to reduce HIPAA pixel false positives</div>
+    <div class="rec-why">The clarityhealth.co false positive reveals a pattern gap in healthcare-specific tracking. Retraining with labeled HIPAA examples will improve accuracy across similar accounts.</div>
+    <div class="rec-meta">
+      <div class="rec-row"><div class="rec-key">Impact</div><div class="rec-v">Improves AI confidence score. Reduces support noise.</div></div>
+      <div class="rec-row"><div class="rec-key">Owner</div><div class="rec-v"><span class="owner-pill product">Product / AI</span></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     FOOTER STRIP
+════════════════════════════════════ -->
+<div class="footer-strip">
+  <div class="footer-item">
+    <div class="f-lbl">Last Scanned</div>
+    <div class="f-val">acmecorp.com · 2h ago</div>
+  </div>
+  <div class="fdiv"></div>
+  <div class="footer-item">
+    <div class="f-lbl">Rules Applied</div>
+    <div class="f-val">142 active rules · v3.1.3</div>
+  </div>
+  <div class="fdiv"></div>
+  <div class="footer-item">
+    <div class="f-lbl">Alert Confidence</div>
+    <div class="f-val">91% · Low false positive rate</div>
+  </div>
+  <div class="fdiv"></div>
+  <div class="footer-item">
+    <div class="f-lbl">Sites Monitored</div>
+    <div class="f-val">12 sites · 9 healthy · 3 warnings</div>
+  </div>
+  <div class="fdiv"></div>
+  <div class="footer-item">
+    <div class="f-lbl">Alerts Resolved</div>
+    <div class="f-val">9 this week</div>
+  </div>
+  <div class="footer-btns">
+    <a class="btn btn-out" href="#">Contact Support</a>
+    <a class="btn btn-blue" href="#">Export Customer Report</a>
+    <a class="btn btn-purple" href="#">Export Admin Report</a>
+  </div>
+</div>
+
+</main>
+</body>
+</html>
